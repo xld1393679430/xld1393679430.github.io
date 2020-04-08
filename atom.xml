@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://xld1393679430.github.io/"/>
-  <updated>2020-04-08T09:56:23.111Z</updated>
+  <updated>2020-04-08T15:56:00.189Z</updated>
   <id>https://xld1393679430.github.io/</id>
   
   <author>
@@ -17,20 +17,38 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>first_blog</title>
+    <link href="https://xld1393679430.github.io/2020/04/08/first-blog/"/>
+    <id>https://xld1393679430.github.io/2020/04/08/first-blog/</id>
+    <published>2020-04-08T15:42:04.000Z</published>
+    <updated>2020-04-08T15:56:00.189Z</updated>
+    
+    <content type="html"><![CDATA[<p>引入本地图片<br>    <img src="/2020/04/08/first-blog/pic1.jpg" alt="我说图片alt"></p><a id="more"></a><p>###<br>    一、插件安装与配置<br>    首先我们需要安装一个图片路径转换的插件，这个插件名字是hexo-asset-image</p><pre><code>npm install https://github.com/CodeFalling/hexo-asset-image --save但是这个插件的内容需要修改【不然可能会出Bug】打开/node_modules/hexo-asset-image/index.js，将内容更换为下面的代码&apos;use strict&apos;;var cheerio = require(&apos;cheerio&apos;);// http://stackoverflow.com/questions/14480345/how-to-get-the-nth-occurrence-in-a-stringfunction getPosition(str, m, i) {  return str.split(m, i).join(m).length;}var version = String(hexo.version).split(&apos;.&apos;);hexo.extend.filter.register(&apos;after_post_render&apos;, function(data){  var config = hexo.config;  if(config.post_asset_folder){        var link = data.permalink;    if(version.length &gt; 0 &amp;&amp; Number(version[0]) == 3)       var beginPos = getPosition(link, &apos;/&apos;, 1) + 1;    else       var beginPos = getPosition(link, &apos;/&apos;, 3) + 1;    // In hexo 3.1.1, the permalink of &quot;about&quot; page is like &quot;.../about/index.html&quot;.    var endPos = link.lastIndexOf(&apos;/&apos;) + 1;    link = link.substring(beginPos, endPos);    var toprocess = [&apos;excerpt&apos;, &apos;more&apos;, &apos;content&apos;];    for(var i = 0; i &lt; toprocess.length; i++){      var key = toprocess[i];      var $ = cheerio.load(data[key], {        ignoreWhitespace: false,        xmlMode: false,        lowerCaseTags: false,        decodeEntities: false      });      $(&apos;img&apos;).each(function(){        if ($(this).attr(&apos;src&apos;)){            // For windows style path, we replace &apos;\&apos; to &apos;/&apos;.            var src = $(this).attr(&apos;src&apos;).replace(&apos;\\&apos;, &apos;/&apos;);            if(!/http[s]*.*|\/\/.*/.test(src) &amp;&amp;               !/^\s*\//.test(src)) {              // For &quot;about&quot; page, the first part of &quot;src&quot; can&apos;t be removed.              // In addition, to support multi-level local directory.              var linkArray = link.split(&apos;/&apos;).filter(function(elem){                return elem != &apos;&apos;;              });              var srcArray = src.split(&apos;/&apos;).filter(function(elem){                return elem != &apos;&apos; &amp;&amp; elem != &apos;.&apos;;              });              if(srcArray.length &gt; 1)                srcArray.shift();              src = srcArray.join(&apos;/&apos;);              $(this).attr(&apos;src&apos;, config.root + link + src);              console.info&amp;&amp;console.info(&quot;update link as:--&gt;&quot;+config.root + link + src);            }        }else{            console.info&amp;&amp;console.info(&quot;no src attr, skipped...&quot;);            console.info&amp;&amp;console.info($(this));        }      });      data[key] = $.html();    }  }});打开_config.yml文件，修改下述内容post_asset_folder: true二、问题推测(一)本地图片没有有效上传至github仓库中，导致引用无效解决方案：安装插件（回看前文）（二）本地图片没有存放在同名文件夹中解决方案：将需要引用的本地图片存放在与文章名相同的文件夹中（三）图片路径出错这也是我出现的问题。打开F12，发现下图问题。因为我在github中关于Hexo的仓库名为850552586.github.io，并不是Ericam.com，所以导致了访问无效。【这个问题可能是因为我更换电脑后重新配置Hexo忽略的地方】解决方案：打开_config.yml修改下述内容（四）相对路径引用的标签插件通过常规的 markdown 语法和相对路径来引用图片和其它资源可能会导致它们在存档页或者主页上显示不正确。在Hexo 2时代，社区创建了很多插件来解决这个问题。但是，随着Hexo 3 的发布，许多新的标签插件被加入到了核心代码中。这使得你可以更简单地在文章中引用你的资源。也就是说在存档页和主页不能使用和文章内容中的常规语法来引用图片。比如说：当你打开文章资源文件夹功能后，你把一个 example.jpg 图片放在了你的资源文件夹中，如果通过使用相对路径的常规 markdown 语法 ![](/example.jpg) ，它将 不会 出现在首页上。（但是它会在文章中按你期待的方式工作）正确的引用图片方式是使用下列的标签插件而不是 markdown ：{% asset_img example.jpg This is an example image %}</code></pre><h3 id="引用自：https-blog-csdn-net-xjm850552586-article-details-84101345"><a href="#引用自：https-blog-csdn-net-xjm850552586-article-details-84101345" class="headerlink" title="引用自：https://blog.csdn.net/xjm850552586/article/details/84101345"></a>引用自：<a href="https://blog.csdn.net/xjm850552586/article/details/84101345" target="_blank" rel="noopener">https://blog.csdn.net/xjm850552586/article/details/84101345</a></h3>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;引入本地图片&lt;br&gt;    &lt;img src=&quot;/2020/04/08/first-blog/pic1.jpg&quot; alt=&quot;我说图片alt&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
     <title>b</title>
     <link href="https://xld1393679430.github.io/2020/04/08/b/"/>
     <id>https://xld1393679430.github.io/2020/04/08/b/</id>
     <published>2020-04-08T09:56:04.000Z</published>
-    <updated>2020-04-08T09:56:23.111Z</updated>
+    <updated>2020-04-08T15:39:00.616Z</updated>
     
-    <content type="html"><![CDATA[<p>这是第二个页面</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="写作介绍"><a href="#写作介绍" class="headerlink" title="写作介绍"></a>写作介绍</h1><h2 id="1，字体介绍"><a href="#1，字体介绍" class="headerlink" title="1，字体介绍"></a>1，字体介绍</h2><p> <em>这是斜体</em> 或 <em>这也是斜体</em><br> <strong>这是粗体</strong><br> <strong><em>这是加粗斜体</em></strong><br> <del>这是删除线</del></p><h2 id="2，分级标题"><a href="#2，分级标题" class="headerlink" title="2，分级标题"></a>2，分级标题</h2><h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><h4 id="四级标题"><a href="#四级标题" class="headerlink" title="四级标题"></a>四级标题</h4><h5 id="五级标题"><a href="#五级标题" class="headerlink" title="五级标题"></a>五级标题</h5><h6 id="六级标题"><a href="#六级标题" class="headerlink" title="六级标题"></a>六级标题</h6><h2 id="3，超链接"><a href="#3，超链接" class="headerlink" title="3，超链接"></a>3，超链接</h2><p> 写法：</p><p> 行内形式：<a href="https://xfbxfbxfb.github.io/" target="_blank" rel="noopener">我的博客</a><br> 参考形式：[我的博客][1]，有一个很好的平台-[简书][2]<br> [1]:<a href="https://xfbxfbxfb.github.io/" target="_blank" rel="noopener">https://xfbxfbxfb.github.io/</a><br> [2]:<a href="http://www.jianshu.com/" target="_blank" rel="noopener">http://www.jianshu.com/</a><br> 自动链接：我的博客地址<a href="https://xfbxfbxfb.github.io/" target="_blank" rel="noopener">https://xfbxfbxfb.github.io/</a></p><h2 id="4-列表"><a href="#4-列表" class="headerlink" title="4,列表"></a>4,列表</h2><p> 无序列表：<br> 写法：</p><ul><li>无序列表项1</li></ul><ul><li>无序列表项2</li></ul><ul><li><p>无序列表项3</p><p>有序列表：<br>写法：<br>  1.有序列表项1<br>  2.有序列表项2<br>  3.有序列表项3</p><h2 id="5，插入图片"><a href="#5，插入图片" class="headerlink" title="5，插入图片"></a>5，插入图片</h2><p>在 Hexo 中插入图片，首先需要将图片放在 source/img/ 文件夹下，然后如下方式进行插入：</p><p><img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1535014836&di=fafdb400041dc371b853cfb3fcc7b851&imgtype=jpg&er=1&src=http%3A%2F%2Fscdn.file1.gk99.com%2Fphoto%2F2015-09%2F2015-09-11%2F14419580206489.jpg" alt></p><h2 id="6，表格"><a href="#6，表格" class="headerlink" title="6，表格"></a>6，表格</h2><table><thead><tr><th>表头1</th><th align="left">表头2</th><th align="center">表头3</th><th align="right">表头4</th></tr></thead><tbody><tr><td>默认左对齐</td><td align="left">左对齐</td><td align="center">居中对其</td><td align="right">右对齐</td></tr><tr><td>默认左对齐</td><td align="left">左对齐</td><td align="center">居中对其</td><td align="right">右对齐</td></tr><tr><td>默认左对齐</td><td align="left">左对齐</td><td align="center">居中对其</td><td align="right">右对齐</td></tr></tbody></table></li></ul>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;这是第二个页面&lt;/p&gt;
-
+        &lt;h1 id=&quot;写作介绍&quot;&gt;&lt;a href=&quot;#写作介绍&quot; class=&quot;headerlink&quot; title=&quot;写作介绍&quot;&gt;&lt;/a&gt;写作介绍&lt;/h1&gt;&lt;h2 id=&quot;1，字体介绍&quot;&gt;&lt;a href=&quot;#1，字体介绍&quot; class=&quot;headerlink&quot; title=&quot;1，字体介
       
     
     </summary>
